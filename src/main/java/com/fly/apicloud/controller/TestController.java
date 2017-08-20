@@ -36,21 +36,18 @@ public class TestController {
             RPriorityDeque<APIDTO> queue = redisClient.getRPriorityDeque(serviceName);
             if(queue.size() > 10){
                 LOGGER.error("服务超限");
-                return "service error";
+                return "service limit";
             }
-            for (int i=0;i<5;i++){
-                Random random = new Random();
-                APIDTO apiDto = new APIDTO(serviceName,random.nextInt(9));
-                LOGGER.info("入队列:{}",apiDto.toString());
-                queue.offer(apiDto);
-                //消息通知-通知业务方消费
-                ApplicationContextHelper.getContext().publishEvent(apiDto);
-            }
-
+            Random random = new Random();
+            APIDTO apiDto = new APIDTO(serviceName,random.nextInt(9));
+            LOGGER.info("入队列:{}",apiDto.toString());
+            queue.offer(apiDto);
+            //消息通知-通知业务方消费
+            ApplicationContextHelper.getContext().publishEvent(apiDto);
         }catch (Exception ex){
             LOGGER.error("error:",ex);
         }
-        return "test";
+        return "success";
     }
 
     @ResponseBody
@@ -59,7 +56,7 @@ public class TestController {
         try{
             RPriorityDeque<APIDTO> queue = redisClient.getRPriorityDeque(serviceName);
             if(null==queue || queue.size() == 0){
-                return "servie error";
+                return "queue size is null";
             }
             APIDTO apidto = redisClient.pollAPIDTO(serviceName);
             LOGGER.info("出队:{}",apidto.toString());
